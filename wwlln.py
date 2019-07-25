@@ -9,8 +9,6 @@
 # added csv file export so that the strikes can be put on a google map.
 
 
-import pdb
-
 import asyncio
 from datetime import timedelta
 import datetime
@@ -26,7 +24,7 @@ import csv
 
 TARGET_LATITUDE = 30
 TARGET_LONGITUDE = -90
-TARGET_RADIUS_MILES = 250
+TARGET_RADIUS_MILES = 225
 TARGET_TIME_MINUTES = 45
 
 # these flags do things
@@ -34,7 +32,6 @@ debug = 0
 myCSV = 1
 
 data = []
-#myLine = []
 b = {}
 b2 = {}
 
@@ -49,7 +46,7 @@ async def main() -> None:
 #            print(await client.dump())
 
             # Get strike data within a specified radius around a set of coordinates _and_
-            # within the last hour:
+            # within the target time:
             strike_data = await client.within_radius(
                     TARGET_LATITUDE,
                     TARGET_LONGITUDE,
@@ -58,7 +55,6 @@ async def main() -> None:
                     window=timedelta(minutes=TARGET_TIME_MINUTES),
                 )
 
-#            print(len(strike_data),"\n",strike_data)
             if len(strike_data) == 0:
                print("No data for this location, radius and time window.")
             
@@ -89,12 +85,10 @@ async def main() -> None:
 
                      myLat = decoded[strike]["lat"]
                      myLong = decoded[strike]["long"]
-                     myDist = decoded[strike]["distance"]
+                     myDist = round(decoded[strike]["distance"],2)
 
                      csvwriter.writerow( [myKey,myLat,myLong,myDist,myDate ] )
                    export_data.close()
-
-
 
                 for key in decoded: 
                     if debug == 1:
