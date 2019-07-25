@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
-#*****************************
+# Originally a test program from Aaron Bach, creator of the 
+# aiowwlln python3 library
+# see https://github.com/bachya/aiowwlln
+#
+# this version by Gerald Swann
+# version 1.1
+# added csv file export so that the strikes can be put on a google map.
 
-#wwlln.py
-#written 22 July 2019 - gswann
 
-#*****************************
+import pdb
 
-
-# """Run an example script to quickly test."""
 import asyncio
 from datetime import timedelta
 import datetime
@@ -20,15 +22,19 @@ from aiowwlln import Client
 from aiowwlln.errors import WWLLNError
 
 import json
+import csv
 
-TARGET_LATITUDE = 24.84
-TARGET_LONGITUDE = 1.71
-TARGET_RADIUS_MILES = 50
-TARGET_TIME_MINUTES = 60
+TARGET_LATITUDE = 30
+TARGET_LONGITUDE = -90
+TARGET_RADIUS_MILES = 250
+TARGET_TIME_MINUTES = 45
 
+# these flags do things
 debug = 0
+myCSV = 1
 
 data = []
+#myLine = []
 b = {}
 b2 = {}
 
@@ -42,9 +48,9 @@ async def main() -> None:
             # Get all strike data:
 #            print(await client.dump())
 
-            # Get strike data within a 50km radius around a set of coordinates _and_
+            # Get strike data within a specified radius around a set of coordinates _and_
             # within the last hour:
-            data = await client.within_radius(
+            strike_data = await client.within_radius(
                     TARGET_LATITUDE,
                     TARGET_LONGITUDE,
                     TARGET_RADIUS_MILES,
@@ -52,13 +58,43 @@ async def main() -> None:
                     window=timedelta(minutes=TARGET_TIME_MINUTES),
                 )
 
-#            print(len(data),data)
+#            print(len(strike_data),"\n",strike_data)
+            if len(strike_data) == 0:
+               print("No data for this location, radius and time window.")
+            
+            if (len(strike_data) > 0):
 
-            if (len(data) > 0):
-                data = str(data)
-                data = data.replace("\'", "\"")
+                strike_data = str(strike_data)
+                strike_data = strike_data.replace("\'", "\"")
 
-                decoded = json.loads(str(data))    
+                decoded = json.loads(strike_data)    
+                
+                if myCSV == 1:
+
+                   export_data = open('./wwlln_lightning.csv', 'w')
+                   # create the csv writer object
+                   csvwriter = csv.writer(export_data)
+
+                   count = 0
+                   for strike in decoded:
+                     if count == 0:
+                         header = (["key", "Latitude", "Longitude", "Distance", "Date"])
+                         csvwriter.writerow(header)
+                         count += 1
+
+                     myKey = strike
+
+                     xtime = int(decoded[strike]["unixTime"])
+                     myDate = datetime.datetime.fromtimestamp(xtime)
+
+                     myLat = decoded[strike]["lat"]
+                     myLong = decoded[strike]["long"]
+                     myDist = decoded[strike]["distance"]
+
+                     csvwriter.writerow( [myKey,myLat,myLong,myDist,myDate ] )
+                   export_data.close()
+
+
 
                 for key in decoded: 
                     if debug == 1:
