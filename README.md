@@ -8,7 +8,7 @@ Uses python3 to access the wwlln website data, filtering by radius and time wind
 The csv flag lets you export data into csv format file.
 Includes example csv file that can be imported on Google maps.
 
-Added code to save data intoa SQLite database for subsequent query.
+Added code to save data into a SQLite database for subsequent query.
 
 ### createtable.py 
    Creates the SQL database tables required by the program
