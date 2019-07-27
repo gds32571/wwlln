@@ -8,13 +8,18 @@
 # version 1.1
 # added csv file export so that the strikes can be put on a google map.
 
+import pdb
 
 import asyncio
 from datetime import timedelta
 import datetime
 from time import gmtime
 
+
+
 from aiohttp import ClientSession
+
+# pdb.set_trace()
 
 from aiowwlln import Client
 from aiowwlln.errors import WWLLNError
@@ -22,14 +27,22 @@ from aiowwlln.errors import WWLLNError
 import json
 import csv
 
-TARGET_LATITUDE = 30
-TARGET_LONGITUDE = -90
-TARGET_RADIUS_MILES = 225
-TARGET_TIME_MINUTES = 45
+import sqlite3
+
+
+TARGET_LATITUDE = 28.840809
+TARGET_LONGITUDE = -82.002535
+TARGET_RADIUS_MILES = 100
+TARGET_TIME_MINUTES = 90
 
 # these flags do things
+# print extra info
 debug = 0
+# save data in CSV format file for Google maps
 myCSV = 1
+# insert data into sql database for analysis
+# can't do SQL unless also doing CSV
+mySQL = 1
 
 data = []
 b = {}
@@ -60,6 +73,8 @@ async def main() -> None:
             
             if (len(strike_data) > 0):
 
+                print("********************************")
+                dup = 0
                 strike_data = str(strike_data)
                 strike_data = strike_data.replace("\'", "\"")
 
@@ -72,24 +87,71 @@ async def main() -> None:
                    csvwriter = csv.writer(export_data)
 
                    count = 0
+                   dup = 0
+                   nodup = 0
+                   
+#                   pdb.set_trace()
+                   if mySQL == 1:    
+                     conn = sqlite3.connect('./lightning-strike.db')
+
+                     cur = conn.cursor()
+                     cur.execute('select max(runevent) from runevents')
+                     row = (cur.fetchone())
+                     cur.close
+
+                     if row[0] is None:
+                        eventnumber = 1
+                     else:
+                        eventnumber = int(row[0]) + 1
+
+                     print("Recording event number: ",end='')
+                     print (eventnumber)
+                     cur.close
+
+                     curtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                     print(curtime)
+                     
                    for strike in decoded:
                      if count == 0:
-                         header = (["key", "Latitude", "Longitude", "Distance", "Date"])
+                         header = (["EventID", "Datetime", "Latitude", "Longitude", "Distance"])
                          csvwriter.writerow(header)
                          count += 1
 
-                     myKey = strike
+                     myEventID = strike
 
-                     xtime = int(decoded[strike]["unixTime"])
-                     myDate = datetime.datetime.fromtimestamp(xtime)
+#                     pdb.set_trace()
+                     unixtime = int(decoded[strike]["unixTime"])
+                     myDate = datetime.datetime.fromtimestamp(unixtime)
+
+                     myDate = myDate.strftime("%Y-%m-%d %H:%M:%S")
+
 
                      myLat = decoded[strike]["lat"]
                      myLong = decoded[strike]["long"]
                      myDist = round(decoded[strike]["distance"],2)
 
-                     csvwriter.writerow( [myKey,myLat,myLong,myDist,myDate ] )
-                   export_data.close()
+                     csvwriter.writerow( [myEventID, myDate, myLat,myLong,myDist ] )
 
+#                     pdb.set_trace()
+                     if mySQL == 1:    
+                        myData = [(eventnumber,myEventID,myDate,myLat,myLong,myDist)]
+
+                        cur = conn.cursor()
+                        cur.execute('select count(*) from events where eventid = (?)', [myEventID])
+                        rowcount = cur.fetchone()[0]
+                        if rowcount > 0:
+                           dup = dup + 1
+                        else:
+                           nodup = nodup + 1   
+                        cur.close()
+                        cur = conn.cursor()
+                        cur.executemany('INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?)', myData)
+#                        conn.commit()
+
+
+
+                   export_data.close()
+                   
                 for key in decoded: 
                     if debug == 1:
                        print(key)
@@ -115,6 +177,8 @@ async def main() -> None:
 
                 print("Number of records= ",end='')    
                 print(len(decoded))
+                if mySQL == 1:
+                   print ("Inserted " + str(nodup) + " rows, ignored " + str(dup) + " rows")
                 print("\n")
 
                 print("Closest strike key= ",key_closest)   
@@ -142,7 +206,13 @@ async def main() -> None:
 
                 print("\n")
 
-
+                if mySQL == 1:
+                     cur = conn.cursor()
+                     cur.executemany('INSERT INTO runevents VALUES (?,?,?,?,?,?,?)',\
+                      [(eventnumber,curtime, TARGET_LATITUDE, TARGET_LONGITUDE, TARGET_RADIUS_MILES, nodup, dup)])
+                     cur.close
+                     conn.commit()
+                     conn.close()
 
         except WWLLNError as err:
             print(err)
