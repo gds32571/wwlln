@@ -64,7 +64,7 @@ timestamp on the most recent record will be now() - 30 minutes.  The oldest time
 vary depending on world wide lightning activitiy.  Last night, that value was about 10 - 13 minutes or so.  Whatever it took to make up 5001 records.
 
 Here is a pseudo-SQL statement that I think describes the website download query:<br>
-<pre>select * from strike_data where unixtime < (now() - 30) order by unix time desc limit 5001;</pre>
+<pre>select * from strike_data where unixtime < (now() - minutes(30)) order by unixtime desc limit 5001;</pre>
 
 So if you request data less often that every 5-8 minutes, you will probably miss records.
 
