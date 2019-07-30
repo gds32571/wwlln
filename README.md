@@ -38,7 +38,7 @@ minutes ago=  31.4
 </pre>
 
 ### result.txt
-I run the program from cron and output the run print data into result.txt.  You can tail this file to see what is happening. Here is the crontab entry:
+I run the program from cron and append the run print data to result.txt.  You can tail this file to see what is happening. Here is the crontab entry:
 
 */5 * * * * cd ./wwlln ; /usr/local/bin/python3 ./wwlln.py >> result.txt 2>&1
 
