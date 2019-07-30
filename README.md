@@ -9,9 +9,10 @@ The csv flag lets you export data into csv format file.
 Includes example csv file that can be imported on Google maps.
 
 Added code to save data into a SQLite database for subsequent query.  The program checks for existing event ids, skips those, 
-and inserts the rest of the records.  These are the variables dup and nodup.  There is a runevent that unique identifies a specific program run.
+and inserts the rest of the records.  These are the variables dup and nodup.  There is a runevent that uniquely identifies a specific program run.
 
 ### Program output:
+<pre>
 ********************************
 Recording event number: 252
 2019-07-30 05:00:04
@@ -34,7 +35,7 @@ key =  8896633   distance =  84.53
 2019-07-30 08:28:38
 h:m:s ago =  0:31:26.683549
 minutes ago=  31.4
-
+</pre>
 
 ### result.txt
 I run the program from cron and output the run print data into result.txt.  You can tail this file to see what is happening.
