@@ -15,8 +15,6 @@ from datetime import timedelta
 import datetime
 from time import gmtime
 
-
-
 from aiohttp import ClientSession
 
 # pdb.set_trace()
@@ -29,11 +27,10 @@ import csv
 
 import sqlite3
 
-
 TARGET_LATITUDE = 28.840809
 TARGET_LONGITUDE = -82.002535
 TARGET_RADIUS_MILES = 100
-TARGET_TIME_MINUTES = 90
+TARGET_TIME_MINUTES = 120
 
 # these flags do things
 # print extra info
@@ -69,6 +66,8 @@ async def main() -> None:
                 )
 
             if len(strike_data) == 0:
+               print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),end = '  ') 
+
                print("No data for this location, radius and time window.")
             
             if (len(strike_data) > 0):
@@ -148,8 +147,6 @@ async def main() -> None:
                         cur.executemany('INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?)', myData)
 #                        conn.commit()
 
-
-
                    export_data.close()
                    
                 for key in decoded: 
@@ -183,7 +180,7 @@ async def main() -> None:
 
                 print("Closest strike key= ",key_closest)   
                 x = key_closest 
-                print("key = ",x," ","distance = ",decoded[x]["distance"])
+                print("key = ",x," ","distance = ",round(decoded[x]["distance"],2))
                 print(decoded[x])
                 print('{}-{:>02}-{:>02} {:>02}:{:>02}:{:>02}'.format(*gmtime(decoded[x]["unixTime"])))
 
@@ -195,7 +192,7 @@ async def main() -> None:
 
                 print("most recent strike key= ",key_recent)   
                 x = key_recent
-                print("key = ",x," ","distance = ",decoded[x]["distance"])
+                print("key = ",x," ","distance = ",round(decoded[x]["distance"],2))
                 print(decoded[x])
                 print('{}-{:>02}-{:>02} {:>02}:{:>02}:{:>02}'.format(*gmtime(decoded[x]["unixTime"])))
 
@@ -211,6 +208,8 @@ async def main() -> None:
                      cur.executemany('INSERT INTO runevents VALUES (?,?,?,?,?,?,?)',\
                       [(eventnumber,curtime, TARGET_LATITUDE, TARGET_LONGITUDE, TARGET_RADIUS_MILES, nodup, dup)])
                      cur.close
+                     # this commit should be for runevens and events as well.
+                     # an atomic unit so to speak.
                      conn.commit()
                      conn.close()
 

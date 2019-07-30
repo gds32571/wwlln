@@ -6,7 +6,9 @@
 sqlite3 ./lightning-strike.db <<"EOF" 
 .headers on 
 .mode csv 
-.output map2.csv 
-select * from events where runevent >= 88;
+.output map0730.csv 
+select * from events where distance < 50 and datetime > '2019-07-29 20:00:00';
 .quit
 EOF
+
+#select * from events where runevent >= 156;
