@@ -38,7 +38,7 @@ minutes ago=  31.4
 </pre>
 
 ### result.txt
-I run the program from cron and output the run print data into result.txt.  You can tail this file to see what is happening.
+I run the program from cron and output the run print data into result.txt.  You can tail this file to see what is happening. Here is the crontab entry:
 
 */5 * * * * cd ./wwlln ; /usr/local/bin/python3 ./wwlln.py >> result.txt 2>&1
 
@@ -48,7 +48,7 @@ I run the program from cron and output the run print data into result.txt.  You 
    
 ### export_to_csv.sh   
    An editable file to export data from SQL into a CSV file for Google maps.  Put any SQL query to map the data 
-you are interested in.
+you are interested in.  You should identify a filename for output in the SQL code portion of this shell script.
    
    
 Worth playing with if you are trying out the Home Assistant component.
