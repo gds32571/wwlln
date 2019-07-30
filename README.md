@@ -65,3 +65,7 @@ vary depending on world wide lightning activitiy.  Last night, that value was ab
 
 So if you request data less often that every 5-8 minutes, you will probably miss records.
 
+Here is how I understand the <b>window</b> that is part of Aaron's library: if lightning activity on ythe whole planet is very slight, then you could get much older data in the 5001 records that are downloaded.  That is when the window would be helpful to limit that data returned from <b>client.within_radius</b>. Otherwise, at less than 10 minutes age from first to last record, it would not really matter.
+
+
+
