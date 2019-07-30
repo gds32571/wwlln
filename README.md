@@ -57,11 +57,14 @@ Worth playing with if you are trying out the Home Assistant component.
 I spent some time 29 July 2019 downloading datasets from the WWLLN website and comparing consective 
 downloads.  I discovered several things:
 
-Each data set contains 5001 lightning strike records.
+Each download from the website contains 5001 lightning strike records.
 At whatever instant you request the data, the web site subtracts 30 minutes as the most
 recent data you are allowed to have. Then it adds 5001 records to the end of that. So the 
 timestamp on the most recent record will be now() - 30 minutes.  The oldest time stamp will 
-vary depending on world wide lightning activitiy.  Last night, that value was about 10 - 13 minutes or so.
+vary depending on world wide lightning activitiy.  Last night, that value was about 10 - 13 minutes or so.  Whatever it took to make up 5001 records.
+
+Here is a pseudo-SQL statement that I think describes the website download query:<br>
+<pre>select * from strike_data where unixtime < (now() - 30) order by unix time desc limit 5001;</pre>
 
 So if you request data less often that every 5-8 minutes, you will probably miss records.
 
